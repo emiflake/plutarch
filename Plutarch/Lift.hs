@@ -1,6 +1,8 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
 
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+
 module Plutarch.Lift (
   -- * Converstion between Plutarch terms and Haskell types
   pconstant,
@@ -14,6 +16,7 @@ module Plutarch.Lift (
   PBuiltinType (..),
   AsDefaultUni (..),
   type HasDefaultUni,
+  showEvalException
 ) where
 
 import Data.Bifunctor (first)
@@ -94,13 +97,10 @@ plift prog = either (error . show) id $ plift' prog
 -}
 newtype PBuiltinType (p :: k -> Type) (h :: Type) s = PBuiltinType (p s)
 
-instance {-# OVERLAPPABLE #-} PLift (PBuiltinType p h) where
-  type PHaskellType (PBuiltinType p h) = h
-
-{-
 instance
   {-# OVERLAPS #-}
   ( PLC.KnownTypeIn PLC.DefaultUni (UPLC.Term PLC.DeBruijn PLC.DefaultUni PLC.DefaultFun ()) h
+  , PLC.KnownTypeAst PLC.DefaultUni h
   , PLC.DefaultUni `PLC.Contains` h
   ) =>
   PLift (PBuiltinType p h)
@@ -114,7 +114,6 @@ instance
       Right (_, _, Scripts.unScript -> UPLC.Program _ _ term) ->
         first (LiftError_EvalException . showEvalException) $
           readKnownSelf term
--}
 
 showEvalException :: EvaluationException CekUserError (MachineError PLC.DefaultFun) (UPLC.Term UPLC.DeBruijn PLC.DefaultUni PLC.DefaultFun ()) -> Text
 showEvalException = T.pack . show

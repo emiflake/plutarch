@@ -149,6 +149,7 @@ test-suite examples
     , tasty
     , tasty-hunit
     , text
+    , shrinker
 
   if flag(development)
     cpp-options: -DDevelopment

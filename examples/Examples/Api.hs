@@ -13,7 +13,7 @@ import Plutarch.Api.V1 (
   PValidatorHash (..),
   PValue (..),
  )
-import Plutarch.Builtin (PAsData, PList, pfromData, pfstBuiltin)
+import Plutarch.Builtin (PAsData, PBuiltinList, pfromData, pfstBuiltin)
 import Plutarch.DataRepr (pindexDataList)
 import Plutarch.List (PListLike (phead))
 
@@ -110,13 +110,13 @@ getMint =
   plam $ \x -> pmatch x $ \case
     (PTxInfo i) -> pindexDataList (Proxy @3) # i
 
-getInputs :: Term s (PTxInfo :--> PAsData (PList PTxInInfo))
+getInputs :: Term s (PTxInfo :--> PAsData (PBuiltinList (PAsData PTxInInfo)))
 getInputs =
   plam $ \x -> pmatch x $ \case
     (PTxInfo i) -> pindexDataList (Proxy @0) # i
 
 -- | Get first validator from TxInInfo
-getValidator :: Term s (PList PTxInInfo :--> PAsData (PValidatorHash))
+getValidator :: Term s (PBuiltinList (PAsData PTxInInfo) :--> PAsData (PValidatorHash))
 getValidator =
   plam $ \xs ->
     pmatch (pfromData $ phead # xs) $ \case

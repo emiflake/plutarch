@@ -33,6 +33,7 @@ import Plutarch.Lift (AsDefaultUni (..), PBuiltinType, PLift (..), pconstant, ty
 import Plutarch.List (PListLike (..), plistEquals)
 import Plutarch.Prelude
 import qualified PlutusCore as PLC
+import qualified PlutusCore.Constant as PLC
 import PlutusTx (Data)
 import qualified PlutusTx (FromData, ToData, fromData, toData)
 
@@ -46,7 +47,9 @@ deriving via
   PBuiltinType (PBuiltinPair a b) (PHaskellType a, PHaskellType b)
   instance
     ( InDefaultUni a
+    , PLC.KnownTypeAst PLC.DefaultUni (PHaskellType a)
     , InDefaultUni b
+    , PLC.KnownTypeAst PLC.DefaultUni (PHaskellType b)
     ) =>
     (PLift (PBuiltinPair a b))
 
@@ -77,7 +80,9 @@ data PBuiltinList (a :: k -> Type) (s :: k)
 deriving via
   PBuiltinType (PBuiltinList a) [PHaskellType a]
   instance
-    InDefaultUni a => (PLift (PBuiltinList a))
+    (InDefaultUni a  
+    , PLC.KnownTypeAst PLC.DefaultUni [PHaskellType a]
+    )=> (PLift (PBuiltinList a))
 
 instance (HasDefaultUni a) => AsDefaultUni (PBuiltinList a) where
   type DefaultUniType (PBuiltinList a) = [DefaultUniType a]
